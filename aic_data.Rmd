@@ -18,7 +18,7 @@ assignment_data = read_excel("./assignment_data_2024.xlsx") %>%
   janitor::clean_names()
 ```
 
-```{r}
+```{r, echo = FALSE}
 assignment_data %>% 
   pivot_longer(
     x1:x366,
@@ -34,7 +34,7 @@ assignment_data %>%
   ggplot(aes(x = attending, fill = assignment)) + geom_bar() + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
-```{r}
+```{r, echo = FALSE}
 assignment_data %>% 
   pivot_longer(
     x1:x366,
@@ -57,7 +57,7 @@ Assignments which are "cardiac OR" and can therefore function as AIC = CT OR 1, 
 
 Assignments which are in the cardiac division but are not in the cardiac OR and are usually not AIC = Cath Lab 1, Cath Lab 2
 
-```{r}
+```{r, echo = FALSE}
 assignment_data %>% 
   pivot_longer(
     x1:x366,
@@ -79,7 +79,7 @@ assignment_data %>%
   ggplot(aes(x = attending, fill = value)) + geom_bar(stat = "count", position = position_dodge2(preserve = "single", width = 0.1)) + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
-```{r}
+```{r, echo = FALSE, warning = FALSE}
 assignment_data %>% 
   pivot_longer(
     x1:x366,
