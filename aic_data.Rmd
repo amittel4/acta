@@ -14,11 +14,91 @@ library(knitr)
 ```
 
 ```{r read in and janitoring, include = FALSE}
-aic_data = read_excel("./aic_data_2024.xlsx") %>% 
+assignment_data = read_excel("./assignment_data_2024.xlsx") %>% 
   janitor::clean_names()
 ```
 
 ```{r}
-aic_data
+assignment_data %>% 
+  pivot_longer(
+    x1:x366,
+    names_to = "day",
+    values_to = "assignment") %>% 
+  drop_na(assignment) %>% 
+  mutate(
+    attending = as.factor(attending),
+    assignment = as.factor(assignment)) %>% 
+  filter(assignment == "Cardiac AIC") %>% 
+  mutate(
+    attending = fct_infreq(attending)) %>% 
+  ggplot(aes(x = attending, fill = assignment)) + geom_bar() + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
 ```
 
+```{r}
+assignment_data %>% 
+  pivot_longer(
+    x1:x366,
+    names_to = "day",
+    values_to = "assignment") %>% 
+  drop_na(assignment) %>% 
+  mutate(
+    attending = as.factor(attending),
+    assignment = as.factor(assignment),
+    acta_or = if_else((assignment == "CT OR 1") | (assignment == "CT OR 2") | (assignment == "CT OR 3") | (assignment == "CT OR 4") | (assignment == "CT OR 5") | (assignment == "CT OR 6"), true = "CT OR", false = "Not CT OR"),
+    acta_or = as.factor(acta_or)) %>% 
+  filter(
+    acta_or == "CT OR") %>%
+  mutate(
+    attending = fct_infreq(attending)) %>% 
+  ggplot(aes(x = attending, fill = acta_or)) + geom_bar() + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+```
+
+Assignments which are "cardiac OR" and can therefore function as AIC = CT OR 1, CT OR 2, CT OR 3, CT OR 4, CT OR 5, CT OR 6\
+
+Assignments which are in the cardiac division but are not in the cardiac OR and are usually not AIC = Cath Lab 1, Cath Lab 2
+
+```{r}
+assignment_data %>% 
+  pivot_longer(
+    x1:x366,
+    names_to = "day",
+    values_to = "assignment") %>% 
+  drop_na(assignment) %>% 
+  mutate(
+    attending = as.factor(attending),
+    assignment = as.factor(assignment),
+    acta_or = if_else((assignment == "CT OR 1") | (assignment == "CT OR 2") | (assignment == "CT OR 3") | (assignment == "CT OR 4") | (assignment == "CT OR 5") | (assignment == "CT OR 6"), true = "CT OR", false = "Not CT OR"),
+    acta_or = as.factor(acta_or),
+    acta_aic = if_else((assignment == "Cardiac AIC"), true = "AIC", false = "Not AIC")) %>% 
+  pivot_longer(
+    acta_or:acta_aic) %>% 
+  filter(
+    value == "CT OR" | value == "AIC") %>% 
+  mutate(
+    attending = fct_infreq(attending)) %>% 
+  ggplot(aes(x = attending, fill = value)) + geom_bar(stat = "count", position = position_dodge2(preserve = "single", width = 0.1)) + theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+```
+
+```{r}
+assignment_data %>% 
+  pivot_longer(
+    x1:x366,
+    names_to = "day",
+    values_to = "assignment") %>% 
+  drop_na(assignment) %>% 
+  mutate(
+    attending = as.factor(attending),
+    assignment = as.factor(assignment),
+    acta_or = if_else((assignment == "CT OR 1") | (assignment == "CT OR 2") | (assignment == "CT OR 3") | (assignment == "CT OR 4") | (assignment == "CT OR 5") | (assignment == "CT OR 6"), true = "CT OR", false = "Not CT OR"),
+    acta_or = as.factor(acta_or),
+    acta_aic = if_else((assignment == "Cardiac AIC"), true = "AIC", false = "Not AIC")) %>% 
+  pivot_longer(
+    acta_or:acta_aic) %>% 
+  filter(
+    value == "CT OR" | value == "AIC") %>% 
+  mutate(
+    value = as.factor(value),
+    value = fct_relevel(value, c("CT OR", "AIC")),
+    attending = fct_relevel(attending, c("Nishanian","Shanewise","Heath","Dickstein","Kachulis","Johnston","Hoffmeister","Jalbout Hastie","Miltiades","Miller, L","Spellman","Mittel","Saxena","Friedman","Hastie","Sutherland","VidalMelo","Mulaikal","Miller, S","Wiles","Batista"))) %>% 
+  ggplot(aes(x = attending, fill = value)) + geom_histogram(stat = "count", position = "identity") + theme(axis.text.x = element_text(angle = 90, vjust = 1, hjust=1)) + theme(legend.title = element_blank()) + labs(caption = "Assignment counts are overlaid, not stacked.\n Y-axis total represents total CT OR assignments.\n AIC assignments are a fraction of total CT OR assignments")
+```
